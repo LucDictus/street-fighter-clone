@@ -32,7 +32,7 @@ Welkom bij Street Fighter! Dit README-bestand bevat de toetsenbordbedieningen vo
 ## Installatie en Uitvoering
 1. Kloon deze repository naar je lokale machine.
    ```bash
-   git clone https://github.com/gebruikersnaam/StreetFighter.git
+   git clone https://github.com/ROC-Tilburg-ICT-Mediatechnologie/proftaak-oldskool-game-alex-luc-street-fighter
 Navigeer naar de map waarin het spel is gekloond.
 bash
 Copy code
