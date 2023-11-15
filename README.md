@@ -1,4 +1,4 @@
-# Street Fighter - Toetsenbordbedieningen
+# Street Fighter
 
 Welkom bij Street Fighter! Dit README-bestand bevat de toetsenbordbedieningen voor het spelen van Street Fighter op je computer met behulp van het toetsenbord.
 
