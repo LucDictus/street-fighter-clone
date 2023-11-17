@@ -3,14 +3,18 @@ import { FighterState } from "../../constants/fighter.js";
 export class Fighter {
     constructor(name, x, y, direction) {
         this.name = name;
-        this.image = new Image();
-        this.frames = new Map();
         this.position = { x, y };
+        this.velocity = { x: 0, y: 0 };
+        this.initialVelocity = {};
         this.direction = direction;
-        this.velocity = 0;
+        this.gravity = 0;
+
+        this.frames = new Map();
         this.animationFrame = 0;
         this.animationTimer = 0;
         this.animations = {};
+
+        this.image = new Image();
 
         this.states = {
             [FighterState.IDLE]: {
@@ -26,16 +30,15 @@ export class Fighter {
                 update: this.handleWalkBackwardState.bind(this),
             },
             [FighterState.JUMP_UP]: {
-                init: this.handleWalkJumpUpInit.bind(this),
-                update: this.handleWalkJumpUpState.bind(this),
+                init: this.handleJumpUpInit.bind(this),
+                update: this.handleJumpUpState.bind(this),
             },
         }
 
-        this.changeState(FighterState.IDLE.toString());
+        this.changeState(FighterState.IDLE);
     }
 
     changeState(newState) {
-        console.log('Changing state to', newState);
         this.currentState = newState;
         this.animationFrame = 0;
 
@@ -43,30 +46,30 @@ export class Fighter {
     }
 
     handleWalkIdleInit() {
-        this.velocity = 0;
+        this.velocity.x = 0;
     }
     handleWalkIdleState() {
 
     }
 
     handleWalkForwardInit() {
-        this.velocity = 150 * this.direction;
+        this.velocity.x = 150 * this.direction;
     }
     handleWalkForwardState() {
 
     }
 
     handleWalkBackwardInit() {
-        this.velocity = -150 * this.direction;
+        this.velocity.x = -150 * this.direction;
     }
     handleWalkBackwardState() {
         
     }
 
-    handleWalkJumpUpInit() {
+    handleJumpUpInit() {
         
     }
-    handleWalkJumpUpState() {
+    handleJumpUpState() {
         
     }
 
@@ -102,31 +105,28 @@ export class Fighter {
             if (this.animationFrame > 5) this.animationFrame = 0;
         }
     
-        this.position.x += this.velocity * time.secondsPassed;
+        this.position.x += this.velocity.x * time.secondsPassed;
+        this.position.y += this.velocity.y * time.secondsPassed;
     
         this.states[this.currentState].update(time, context);
         this.updateStageConstraints(context);
     }    
 
     draw(context) {
-        const frameData = this.frames.get(this.animations[this.currentState][this.animationFrame]);
-        if (frameData) {
-            const [
-                [x, y, width, height],
-                [originX, originY],
-            ] = frameData;
-    
-            context.scale(this.direction, 1);
-            context.drawImage(
-                this.image,
-                x, y,
-                width, height,
-                Math.floor(this.position.x * this.direction) - originX, Math.floor(this.position.y) - originY + 60,
-                width, height
-            );           
-            context.setTransform(1, 0, 0, 1, 0, 0);
-        } else {
-            console.error('Frame data not found for:', this.currentState, this.animationFrame);
-        }
+        const [
+            [x, y, width, height],
+            [originX, originY],
+        ] = this.frames.get(this.animations[this.currentState][this.animationFrame]);
+
+        context.scale(this.direction, 1);
+        context.drawImage(
+            this.image,
+            x, y,
+            width, height,
+            Math.floor(this.position.x * this.direction) - originX, Math.floor(this.position.y) - originY ,
+            width, height
+        );           
+        context.setTransform(1, 0, 0, 1, 0, 0);
+        
     }
 }
