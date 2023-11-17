@@ -31,10 +31,11 @@ export class Fighter {
             },
         }
 
-        this.changeState = (FighterState.Idle);
+        this.changeState(FighterState.IDLE.toString());
     }
 
     changeState(newState) {
+        console.log('Changing state to', newState);
         this.currentState = newState;
         this.animationFrame = 0;
 
@@ -71,44 +72,61 @@ export class Fighter {
 
     updateStageConstraints(context) {
         const WIDTH = 32;
-
-        if (this.position.x > context.canvas.width - WIDTH) {
-            this.position.x = context.canvas.width - WIDTH;
+        const HEIGHT = 90; 
+    
+        let newX = this.position.x;
+        if (newX > context.canvas.width - WIDTH) {
+            newX = context.canvas.width - WIDTH;
+        }
+        if (newX < WIDTH) {
+            newX = WIDTH;
         }
     
-        if (this.position.x < WIDTH) {
-            this.position.x = WIDTH;
+        let newY = this.position.y;
+        if (newY > context.canvas.height - HEIGHT) {
+            newY = context.canvas.height - HEIGHT;
         }
+    
+        this.position.x = newX;
+        this.position.y = newY;
     }
+    
+    
+    
 
     update(time, context) {
         if (time.previous > this.animationTimer + 60) {
             this.animationTimer = time.previous;
-            
+    
             this.animationFrame++;
             if (this.animationFrame > 5) this.animationFrame = 0;
         }
     
         this.position.x += this.velocity * time.secondsPassed;
-
+    
         this.states[this.currentState].update(time, context);
         this.updateStageConstraints(context);
-    }
+    }    
 
     draw(context) {
-        const [
-            [x, y, width, height],
-            [originX, originY],
-        ] = this.frames.get(this.animations[this.currentState][this.animationFrame])
+        const frameData = this.frames.get(this.animations[this.currentState][this.animationFrame]);
+        if (frameData) {
+            const [
+                [x, y, width, height],
+                [originX, originY],
+            ] = frameData;
     
-        context.scale(this.direction, 1);
-        context.drawImage(
-            this.image,
-            x, y, 
-            width, height, 
-            Math.floor(this.position.x * this.direction) - originX, Math.floor(this.position.y) - originY, 
-            width, height
-        );
-        context.setTransform(1, 0, 0, 1, 0, 0);
+            context.scale(this.direction, 1);
+            context.drawImage(
+                this.image,
+                x, y,
+                width, height,
+                Math.floor(this.position.x * this.direction) - originX, Math.floor(this.position.y) - originY + 60,
+                width, height
+            );           
+            context.setTransform(1, 0, 0, 1, 0, 0);
+        } else {
+            console.error('Frame data not found for:', this.currentState, this.animationFrame);
+        }
     }
 }

@@ -1,5 +1,5 @@
 // index.js
-import { Ken } from "./entities/fighters/Ken.js";
+import { Ken } from "./entities/fighters/Ken.js"; // Updated import statement
 import { Ryu } from "./entities/fighters/Ryu.js";
 import { Stage } from "./entities/Stage.js";
 import { FpsCounter } from "./entities/FpsCounter.js";
@@ -21,14 +21,14 @@ function handleFormSubmit(event, fighters) {
     event.preventDefault();
 
     const selectedCheckboxes = Array
-    .from(event.target.querySelectorAll('input[type="checkbox"]:checked'))
-    .map(checkbox => checkbox.value);
+        .from(event.target.querySelectorAll('input[type="checkbox"]:checked'))
+        .map(checkbox => checkbox.value);
 
-    const options = event.target.querySelectorAll('select');
+    const selectedDropdown = event.target.querySelector('#state-dropdown'); // Updated this line
 
     fighters.forEach(fighter => {
         if (selectedCheckboxes.includes(fighter.name)) {
-            fighter.changeState(options.value);
+            fighter.changeState(selectedDropdown.value); // Updated this line
         }
     });
 }
@@ -42,9 +42,9 @@ window.addEventListener('load', function () {
     context.imageSmoothingEnabled = false;
 
     const fighters = [
-        new Ryu(104, STAGE_FLOOR, FighterDirection.Right),
-        new Ken(280, STAGE_FLOOR, FighterDirection.Left),
-    ];
+        new Ryu(104, STAGE_FLOOR, FighterDirection.RIGHT),
+        new Ken(280, STAGE_FLOOR, FighterDirection.LEFT),
+    ];   
 
     const entities = [
         new Stage(),
