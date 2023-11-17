@@ -1,4 +1,5 @@
 import { FighterState } from "../../constants/fighter.js";
+import { STAGE_FLOOR } from "../../constants/stage.js";
 
 export class Fighter {
     constructor(name, x, y, direction) {
@@ -18,20 +19,58 @@ export class Fighter {
 
         this.states = {
             [FighterState.IDLE]: {
-                init: this.handleWalkIdleInit.bind(this),
-                update: this.handleWalkIdleState.bind(this),
+                init: this.handleIdleInit.bind(this),
+                update: () => {},
+                validFrom: [
+                    undefined,
+                    FighterState.IDLE, FighterState.WALK_FORWARD, FighterState.WALK_BACKWARD,
+                    FighterState.JUMP_UP, FighterState.JUMP_FORWARD, FighterState.JUMP_BACKWARD,
+                    FighterState.CROUCH_UP,
+                ],
             },
             [FighterState.WALK_FORWARD]: {
-                init: this.handleWalkForwardInit.bind(this),
-                update: this.handleWalkForwardState.bind(this),
+                init: this.handleMoveInit.bind(this),
+                update: () => {},
+                validFrom: [
+                    FighterState.IDLE, FighterState.WALK_BACKWARD,
+                ],
             },
             [FighterState.WALK_BACKWARD]: {
-                init: this.handleWalkBackwardInit.bind(this),
-                update: this.handleWalkBackwardState.bind(this),
+                init: this.handleMoveInit.bind(this),
+                update: () => {},
+                validFrom: [
+                    FighterState.IDLE, FighterState.WALK_FORWARD,
+                ],
             },
             [FighterState.JUMP_UP]: {
-                init: this.handleJumpUpInit.bind(this),
-                update: this.handleJumpUpState.bind(this),
+                init: this.handleJumpInit.bind(this),
+                update: this.handleJumpState.bind(this),
+                validFrom: [FighterState.IDLE],
+            },
+            [FighterState.JUMP_FORWARD]: {
+                init: this.handleJumpInit.bind(this),
+                update: this.handleJumpState.bind(this),
+                validFrom: [FighterState.IDLE, FighterState.WALK_FORWARD],
+            },
+            [FighterState.JUMP_BACKWARD]: {
+                init: this.handleJumpInit.bind(this),
+                update: this.handleJumpState.bind(this),
+                validFrom: [FighterState.IDLE, FighterState.WALK_BACKWARD],
+            },
+            [FighterState.CROUCH]: {
+                init: () => {},
+                update: () => {},
+                validFrom: [FighterState.CROUCH_DOWN],
+            },
+            [FighterState.CROUCH_DOWN]: {
+                init: () => {},
+                update: this.handleCrouchDownState.bind(this),
+                validFrom: [FighterState.IDLE, FighterState.WALK_FORWARD, FighterState.WALK_BACKWARD],
+            },
+            [FighterState.CROUCH_UP]: {
+                init: () => {},
+                update: this.handleCrouchUpState.bind(this),
+                validFrom: [FighterState.CROUCH],
             },
         }
 
@@ -39,94 +78,121 @@ export class Fighter {
     }
 
     changeState(newState) {
+        if (newState === this.currentState
+            || !this.states[newState].validFrom.includes(this.currentState)) return;
+
         this.currentState = newState;
         this.animationFrame = 0;
 
         this.states[this.currentState].init();
     }
 
-    handleWalkIdleInit() {
+    handleIdleInit() {
         this.velocity.x = 0;
-    }
-    handleWalkIdleState() {
-
+        this.velocity.y = 0;
     }
 
-    handleWalkForwardInit() {
-        this.velocity.x = 150 * this.direction;
-    }
-    handleWalkForwardState() {
-
+    handleMoveInit() {
+        this.velocity.x = this.initialVelocity.x[this.currentState] ?? 0;
     }
 
-    handleWalkBackwardInit() {
-        this.velocity.x = -150 * this.direction;
-    }
-    handleWalkBackwardState() {
-        
+    handleJumpInit() {
+        this.velocity.y = this.initialVelocity.jump;
+        this.handleMoveInit();
     }
 
-    handleJumpUpInit() {
-        
+    handleCrouchDownState() {
+        if (this.animations[this.currentState][this.animationFrame][1] === -2) {
+            this.changeState(FighterState.CROUCH);
+        }
     }
-    handleJumpUpState() {
-        
+
+    handleCrouchUpState() {
+        if (this.animations[this.currentState][this.animationFrame][1] === -2) {
+            this.changeState(FighterState.IDLE);
+        }
+    }
+
+    handleJumpState(time) {
+        this.velocity.y += this.gravity * time.secondsPassed;
+
+        if (this.position.y > STAGE_FLOOR) {
+            this.position.y = STAGE_FLOOR;
+            this.changeState(FighterState.IDLE);
+        }
     }
 
     updateStageConstraints(context) {
         const WIDTH = 32;
-        const HEIGHT = 90; 
     
-        let newX = this.position.x;
-        if (newX > context.canvas.width - WIDTH) {
-            newX = context.canvas.width - WIDTH;
+        if (this.position.x > context.canvas.width - WIDTH) {
+            this.position.x = context.canvas.width - WIDTH;
         }
-        if (newX < WIDTH) {
-            newX = WIDTH;
+
+        if (this.position.x < WIDTH) {
+            this.position.x = WIDTH;
         }
+    }
     
-        let newY = this.position.y;
-        if (newY > context.canvas.height - HEIGHT) {
-            newY = context.canvas.height - HEIGHT;
-        }
+    updateAnimation(time) {
+        const animation = this.animations[this.currentState];
+        const [, frameDelay] = animation[this.animationFrame];
     
-        this.position.x = newX;
-        this.position.y = newY;
+        if (time.previous > this.animationTimer + frameDelay) {
+            this.animationTimer = time.previous;
+    
+            if (frameDelay > 0) {
+                this.animationFrame++;
+            }
+    
+            if (this.animationFrame >= animation.length) {
+                this.animationFrame = 0;
+            }
+        }
     }
     
     
-    
-
     update(time, context) {
-        if (time.previous > this.animationTimer + 60) {
-            this.animationTimer = time.previous;
-    
-            this.animationFrame++;
-            if (this.animationFrame > 5) this.animationFrame = 0;
-        }
-    
-        this.position.x += this.velocity.x * time.secondsPassed;
+        this.position.x += (this.velocity.x * this.direction) * time.secondsPassed;
         this.position.y += this.velocity.y * time.secondsPassed;
     
         this.states[this.currentState].update(time, context);
+        this.updateAnimation(time);
         this.updateStageConstraints(context);
-    }    
+    }
+    
+    drawDebug(context) {
+        context.lineWidth = 1;
+
+        context.beginPath();
+        context.strokeStyle = 'white';
+        context.moveTo(Math.floor(this.position.x) -4.5, Math.floor(this.position.y));
+        context.lineTo(Math.floor(this.position.x) + 4.5, Math.floor(this.position.y));
+        context.moveTo(Math.floor(this.position.x), Math.floor(this.position.y) - 4.5);
+        context.lineTo(Math.floor(this.position.x), Math.floor(this.position.y) + 4.5);
+        context.stroke();
+    }
 
     draw(context) {
+        const animation = this.animations[this.currentState];
+        const frameKey = animation[this.animationFrame][0];
+        const frameData = this.frames.get(frameKey);
+
         const [
             [x, y, width, height],
             [originX, originY],
-        ] = this.frames.get(this.animations[this.currentState][this.animationFrame]);
+        ] = frameData;
 
         context.scale(this.direction, 1);
         context.drawImage(
             this.image,
             x, y,
             width, height,
-            Math.floor(this.position.x * this.direction) - originX, Math.floor(this.position.y) - originY ,
+            Math.floor(this.position.x * this.direction) - originX, Math.floor(this.position.y) - originY,
             width, height
-        );           
+        );
         context.setTransform(1, 0, 0, 1, 0, 0);
-        
+
+        this.drawDebug(context);
     }
 }
