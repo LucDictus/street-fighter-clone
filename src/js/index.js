@@ -18,3 +18,7 @@ window.addEventListener('load', function () {
 
     new StreetFighterGame().start();
 });
+
+
+  
+//   document.addEventListener('keydown', handleKeyEvent);

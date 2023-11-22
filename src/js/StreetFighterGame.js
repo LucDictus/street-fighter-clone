@@ -58,6 +58,8 @@ export class StreetFighterGame {
         this.draw();
     }
 
+
+
     handleFormSubmit(event, fighters) {
         event.preventDefault();
 
@@ -67,16 +69,57 @@ export class StreetFighterGame {
 
         const selectedDropdown = event.target.querySelector('#state-dropdown');
 
+
         this.fighters.forEach(fighter => {
+            // console.log(fighter);
             if (selectedCheckboxes.includes(fighter.name)) {
                 fighter.changeState(selectedDropdown.value); 
             }
         });
     }
 
+    handleKeyEvent(event) {
+        console.log(event.keyCode);
+        switch(event.keyCode) {
+            case 87:
+                this.fighters[0].changeState("jumpUp");
+                break;
+            case 65:
+
+                this.fighters[0].changeState("walkBackwards");
+                break;
+            case 83:
+
+                this.fighters[0].changeState("crouchDown");
+                break;
+            case 68:
+
+                this.fighters[0].changeState("walkForwards");
+                break;
+
+        }
+      }
+
+    handleKeyUpEvent(event) {
+    
+        switch(event.keyCode) {
+            case 65:
+                this.fighters[0].changeState("idle");
+                break;
+            case 83:
+                this.fighters[0].changeState("crouchUp");
+                break;
+            case 68:
+                this.fighters[0].changeState("idle");
+                break;
+        }
+    }
+
+      
     start() {
         document.addEventListener('submit', this.handleFormSubmit.bind(this));
-
+        document.addEventListener('keydown', this.handleKeyEvent.bind(this));
+        document.addEventListener('keyup', this.handleKeyUpEvent.bind(this));
         window.requestAnimationFrame(this.frame.bind(this));
     }
     
