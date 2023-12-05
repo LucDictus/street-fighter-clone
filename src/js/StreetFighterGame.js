@@ -79,38 +79,58 @@ export class StreetFighterGame {
     }
 
     handleKeyEvent(event) {
-        console.log(event.keyCode);
-        switch(event.keyCode) {
-            case 87:
+        // console.log(event.keyCode);
+            switch(event.keyCode) {
+            case 87: // W DONE
+                if(this.fighters[0].currentState == "walkForwards") {
+                    this.fighters[0].changeState("jumpForward");
+                }
+                if(this.fighters[0].currentState == "walkBackwards") {
+                    this.fighters[0].changeState("jumpBackward");
+                }
                 this.fighters[0].changeState("jumpUp");
                 break;
-            case 65:
-
-                this.fighters[0].changeState("walkBackwards");
+            case 65: // A DONE
+                if(this.fighters[0].currentState == "idle" || "walkForwards") {
+                    this.fighters[0].changeState("walkBackwards");
+                }
                 break;
-            case 83:
-
-                this.fighters[0].changeState("crouchDown");
+            case 83: // S DONE
+                if(this.fighters[0].currentState == "idle") {
+                    this.fighters[0].changeState("idle");
+                    this.fighters[0].changeState("crouchDown");
+                }
+                
                 break;
-            case 68:
+            case 68: // D DONE
 
-                this.fighters[0].changeState("walkForwards");
+                if(this.fighters[0].currentState == "idle" || "walkBackwards") {
+                    this.fighters[0].changeState("walkForwards");
+                }
+               
                 break;
 
-        }
+            }
+        
       }
 
     handleKeyUpEvent(event) {
-    
         switch(event.keyCode) {
-            case 65:
-                this.fighters[0].changeState("idle");
+            case 65: // A DONE
+                if(this.fighters[0].currentState == "walkBackwards") {
+                    this.fighters[0].changeState("idle");
+                }
                 break;
-            case 83:
-                this.fighters[0].changeState("crouchUp");
+            case 83: // S DONE
+                if(this.fighters[0].currentState != "crouchDown") {
+                    this.fighters[0].changeState("crouchUp");
+                }
                 break;
-            case 68:
-                this.fighters[0].changeState("idle");
+            case 68: // D DONE
+            
+                if(this.fighters[0].currentState == "walkForwards") {
+                    this.fighters[0].changeState("idle");
+                }
                 break;
         }
     }

@@ -65,7 +65,7 @@ export class Fighter {
             [FighterState.CROUCH_DOWN]: {
                 init: () => {},
                 update: this.handleCrouchDownState.bind(this),
-                validFrom: [FighterState.IDLE, FighterState.WALK_FORWARD, FighterState.WALK_BACKWARD],
+                validFrom: [FighterState.IDLE, FighterState.WALK_BACKWARD],
             },
             [FighterState.CROUCH_UP]: {
                 init: () => {},
