@@ -11,23 +11,13 @@ Welkom bij Street Fighter! Dit README-bestand bevat de toetsenbordbedieningen vo
 - **Pijl Rechts:** Naar rechts bewegen
 
 ### Aanvallen:
-- **A:** Licht aanvallen
-- **S:** Middelzwaar aanvallen
-- **D:** Zwaar aanvallen
+- Nog in development
 
 ### Speciale Aanvallen:
-- **Q:** Speciale aanval 1
-- **W:** Speciale aanval 2
-- **E:** Speciale aanval 3
+- Nog in development
 
 ### Verdediging:
-- **J:** Blokkeren
-
-### Super Aanval:
-- **U:** Super aanval (indien beschikbaar)
-
-### Combo's:
-- *Voer specifieke toetsencombinaties in voor speciale combo's en aanvallen.*
+- Nog in development
 
 ## Installatie en Uitvoering
 1. Kloon deze repository naar je lokale machine.
